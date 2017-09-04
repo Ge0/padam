@@ -1,0 +1,18 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+	<head>
+
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	    <title>Padam Test Technique</title>
+	</head>
+	<body>
+		<a href="{% url 'booking_list' %}" ><span>Home</span></a>
+		<a href="{% url 'booking_logout' %}" ><span>Logout</span></a>
+		{% block content %}
+		{% endblock %}
+	</body>
+</html>

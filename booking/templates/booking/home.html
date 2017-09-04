@@ -1,0 +1,40 @@
+<style>
+	table, th, td {
+	    border: 1px solid black;
+	    text-align: center;
+	    margin: 20px;
+	}
+</style>
+
+{% extends 'booking/base.html' %}
+
+{% block content %}
+
+<h1>Vos réservations sont :</h1>
+
+<h3>
+	<span>Créer une nouvelle réservation <a href="{% url 'booking_new' %}" >+</a></span>
+</h3>
+
+<table>
+	<tr>
+		<th>Voir plus</th>
+		<th>Date de réservation</th>
+		<th>Adresse de départ</th>
+		<th>Adresse de destination</th>
+		<th>Temps estimé</th>
+		<th>Supprimer</th>
+	</tr>
+	{% for booking in bookings %}
+	<tr>
+		<td><a href="{% url 'booking' bookingID=booking.id %}" ><span>+</span></a></td>
+		<td>{{ booking.reservation_date }}</td>
+		<td>{{ booking.start_address }}</td>
+		<td>{{ booking.dest_address }}</td>
+		<td>{{ booking.duration }}</td>
+		<td><a href="{% url 'booking_delete' bookingID=booking.id %}" ><span>x</span></a></td>
+	</tr>
+	{% endfor %}
+</table>
+
+{% endblock %}

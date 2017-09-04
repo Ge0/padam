@@ -1,0 +1,21 @@
+{% if form.errors %}
+<p>La connexion a échoué...</p>
+{% endif %}
+<form action="{% url "booking_login" %}" method="post">
+        {% csrf_token %}
+        <table>
+                <tr>
+                        <td>{{ form.username.label_tag }}</td>
+                        <td>{{ form.username }}</td>
+                </tr>
+                <tr>
+                        <td>{{ form.password.label_tag }}</td>
+                        <td>{{ form.password }}</td>
+                </tr>
+        </table>
+        <input type="submit" value="login" />
+        <input type="hidden" name="next" value="{{ next }}" />
+</form>
+<form action="{% url "booking_join" %}">
+        <input type="submit" value="join" />
+</form>
