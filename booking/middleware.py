@@ -3,7 +3,8 @@ import re
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 
-class RequireLoginMiddleware(object):
+
+class RequireLoginMiddleware(object):  # flake8: noqa
     """
     Source : http://stackoverflow.com/questions/2164069/best-way-to-make-djangos-login-required-the-default
 
@@ -26,10 +27,13 @@ class RequireLoginMiddleware(object):
     LOGIN_REQUIRED_URLS_EXCEPTIONS is, conversely, where you explicitly
     define any exceptions (like login and logout URLs).
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
-        self.required = tuple(re.compile(url) for url in settings.LOGIN_REQUIRED_URLS)
-        self.exceptions = tuple(re.compile(url) for url in settings.LOGIN_REQUIRED_URLS_EXCEPTIONS)
+        self.required = tuple(
+            re.compile(url) for url in settings.LOGIN_REQUIRED_URLS)
+        self.exceptions = tuple(
+            re.compile(url) for url in settings.LOGIN_REQUIRED_URLS_EXCEPTIONS)
 
     def __call__(self, request):
         response = self.get_response(request)
@@ -49,7 +53,8 @@ class RequireLoginMiddleware(object):
         # wrapped with the login_required decorator
         for url in self.required:
             if url.match(request.path):
-                return login_required(view_func)(request, *view_args, **view_kwargs)
+                return login_required(view_func)(request, *view_args,
+                                                 **view_kwargs)
 
         # Explicitly return None for all non-matching requests
         return None
