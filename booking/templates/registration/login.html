@@ -1,7 +1,7 @@
 {% if form.errors %}
 <p>La connexion a échoué...</p>
 {% endif %}
-<form action="{% url "booking_login" %}" method="post">
+<form action="{% url "login" %}" method="post">
         {% csrf_token %}
         <table>
                 <tr>
@@ -16,6 +16,6 @@
         <input type="submit" value="login" />
         <input type="hidden" name="next" value="{{ next }}" />
 </form>
-<form action="{% url "booking_join" %}">
+<form action="{% url "booking:join" %}">
         <input type="submit" value="join" />
 </form>

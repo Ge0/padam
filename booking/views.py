@@ -123,6 +123,6 @@ def join(request):
 
         userDjango.set_password(request.POST['password'])
         userDjango.save()
-        return redirect('/bookings/login')
+        return redirect(reverse('login'))
 
     return render(request, 'booking/join.html', locals())

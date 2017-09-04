@@ -1,6 +1,6 @@
-<a href="{% url 'booking_login' %}" ><span>Login</span></a>
+<a href="{% url 'login' %}" ><span>Login</span></a>
 
-<form action="{% url "booking_join" %}" method="post">
+<form action="{% url "booking:join" %}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Submit" />

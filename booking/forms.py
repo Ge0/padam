@@ -9,7 +9,6 @@ class BookingForm(forms.Form):
 
 
 class JoinForm(forms.Form):
-    username = forms.CharField(max_length=16, label='Nom d' 'utilisateur')
     surname = forms.CharField(max_length=50, label='Nom')
     firstname = forms.CharField(max_length=50, label='Prénom')
     email = forms.EmailField(label='Email')

@@ -10,8 +10,8 @@
 	    <title>Padam Test Technique</title>
 	</head>
 	<body>
-		<a href="{% url 'booking_list' %}" ><span>Home</span></a>
-		<a href="{% url 'booking_logout' %}" ><span>Logout</span></a>
+		<a href="{% url 'booking:list' %}" ><span>Home</span></a>
+		<a href="{% url 'logout' %}" ><span>Logout</span></a>
 		{% block content %}
 		{% endblock %}
 	</body>

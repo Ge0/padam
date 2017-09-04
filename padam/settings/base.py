@@ -120,15 +120,15 @@ STATIC_URL = '/static/'
 
 # Params for login_required
 
-LOGIN_URL = 'booking_login' # Target if authentication fails
-LOGIN_REDIRECT_URL = 'booking_list' # Target if authentication succeeds
+LOGIN_URL = 'login' # Target if authentication fails
+LOGIN_REDIRECT_URL = 'booking:list' # Target if authentication succeeds
 
 LOGIN_REQUIRED_URLS = (
     r'/bookings/(.*)$',
 )
 
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
-    r'/bookings/login(.*)$',
-    r'/bookings/logout(.*)$',
+    r'login(.*)$',
+    r'logout(.*)$',
     r'/bookings/join(.*)$',
 )
