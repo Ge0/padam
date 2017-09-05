@@ -1,8 +1,12 @@
-from car.models import Car
 from django.contrib.auth.models import User
 from django.db import models
 
-# Create your models here.
+
+class Car(models.Model):
+    disponibility = models.BooleanField()
+
+    def __str__(self):
+        return str(self.id)
 
 
 class Booking(models.Model):

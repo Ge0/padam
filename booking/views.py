@@ -1,14 +1,13 @@
 from datetime import datetime
 
 import googlemaps
-from car.models import Car
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import redirect, render
 
 from .forms import BookingForm, JoinForm
-from .models import Booking
+from .models import Booking, Car
 
 # Create your views here.
 
