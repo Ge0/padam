@@ -2,6 +2,7 @@ from django.conf.urls import url
 
 from . import views
 
+app_name = "booking"
 urlpatterns = [
     url(r'^join$', views.join, name='join'),
     url(r'^home$', views.home, name='list'),
