@@ -3,7 +3,8 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden
-from django.shortcuts import redirect, render, reverse
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from . import core
 from .forms import BookingForm, JoinForm
@@ -30,7 +31,7 @@ def new(request):
     cars = core.get_cars()
     if len(cars) == 0:
         logger.warning("There is not any car available.")
-        return redirect(reverse('home'))
+        return redirect('/bookings/home')
 
     form = BookingForm(request.POST or None)
     if form.is_valid():
