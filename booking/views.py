@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from django.contrib.auth.models import User
@@ -7,6 +8,8 @@ from django.shortcuts import redirect, render, reverse
 from . import core
 from .forms import BookingForm, JoinForm
 from .models import Booking
+
+logger = logging.getLogger(__name__)
 
 
 def home(request):
@@ -24,6 +27,11 @@ def booking(request, bookingID):
 
 
 def new(request):
+    cars = core.get_cars()
+    if len(cars) == 0:
+        logger.warning("There is not any car available.")
+        return redirect(reverse('home'))
+
     form = BookingForm(request.POST or None)
     if form.is_valid():
 
@@ -40,10 +48,8 @@ def new(request):
             booking.dest_address = form.cleaned_data['dest_address']
             booking.duration = duration
             booking.state = True
-            cars = core.get_cars()
-            if len(cars) > 0:
-                booking.car = cars[0]
-                core.set_car_disponibility(cars[0].id, False)
+            booking.car = cars[0]
+            core.set_car_disponibility(cars[0].id, False)
             booking.save()
             return redirect('/bookings/' + str(booking))
 
