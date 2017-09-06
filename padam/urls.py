@@ -17,8 +17,11 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
+from booking.forms import LoginForm
+
 urlpatterns = [
-    url(r'^account/login$', auth_views.login, name='login'),
+    url(r'^account/login$', auth_views.login,
+        {'authentication_form': LoginForm}, name='login'),
     url(r'^account/logout$',
         auth_views.logout, {'next_page': 'login'},
         name='logout'),
