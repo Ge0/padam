@@ -27,12 +27,12 @@
 	</tr>
 	{% for booking in bookings %}
 	<tr>
-		<td><a href="{% url 'booking:view' bookingID=booking.id %}" ><span>+</span></a></td>
+		<td><a href="{% url 'booking:view' booking_id=booking.id %}" ><span>+</span></a></td>
 		<td>{{ booking.reservation_date }}</td>
 		<td>{{ booking.start_address }}</td>
 		<td>{{ booking.dest_address }}</td>
 		<td>{{ booking.duration }}</td>
-		<td><a href="{% url 'booking:delete' bookingID=booking.id %}" ><span>x</span></a></td>
+		<td><a href="{% url 'booking:delete' booking_id=booking.id %}" ><span>x</span></a></td>
 	</tr>
 	{% endfor %}
 </table>

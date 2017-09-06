@@ -18,8 +18,8 @@ def home(request):
     return render(request, 'booking/home.html', dict([("bookings", data)]))
 
 
-def booking(request, bookingID):
-    data = core.get_booking(bookingID)
+def booking(request, booking_id):
+    data = core.get_booking(booking_id)
     if data.user == request.user:
         return render(request, 'booking/booking.html',
                       dict([('booking', data)]))
@@ -31,7 +31,7 @@ def new(request):
     cars = core.get_cars()
     if len(cars) == 0:
         logger.warning("There is not any car available.")
-        return redirect('/bookings/home')
+        return redirect(reverse('booking:list'))
 
     form = BookingForm(request.POST or None)
     if form.is_valid():
@@ -52,13 +52,14 @@ def new(request):
             booking.car = cars[0]
             core.set_car_disponibility(cars[0].id, False)
             booking.save()
-            return redirect('/bookings/' + str(booking))
+            return redirect(reverse('booking:view',
+                                    kwargs={'booking_id': booking.id}))
 
     return render(request, 'booking/new.html', locals())
 
 
-def delete(request, bookingID):
-    core.delete_booking(bookingID)
+def delete(request, booking_id):
+    core.delete_booking(booking_id)
     data = core.get_bookings(request.user)
 
     return render(request, 'booking/home.html', dict([("bookings", data)]))
@@ -67,14 +68,14 @@ def delete(request, bookingID):
 def join(request):
     form = JoinForm(request.POST or None)
     if form.is_valid():
-        userDjango = User.objects.create(
+        django_user = User.objects.create(
             username=form.cleaned_data['email'],
             last_name=form.cleaned_data['surname'],
             first_name=form.cleaned_data['firstname'],
             email=form.cleaned_data['email'])
 
-        userDjango.set_password(request.POST['password'])
-        userDjango.save()
+        django_user.set_password(request.POST['password'])
+        django_user.save()
         return redirect(reverse('login'))
 
     return render(request, 'booking/join.html', locals())

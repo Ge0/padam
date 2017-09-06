@@ -26,5 +26,5 @@ urlpatterns = [
         auth_views.logout, {'next_page': 'login'},
         name='logout'),
     url(r'^admin/', admin.site.urls),
-    url(r'^bookings/', include('booking.urls', namespace="booking")),
+    url(r'^bookings/', include('booking.urls')),
 ]
