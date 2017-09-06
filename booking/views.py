@@ -67,7 +67,7 @@ def join(request):
     form = JoinForm(request.POST or None)
     if form.is_valid():
         userDjango = User.objects.create(
-            username=form.cleaned_data['username'],
+            username=form.cleaned_data['email'],
             last_name=form.cleaned_data['surname'],
             first_name=form.cleaned_data['firstname'],
             email=form.cleaned_data['email'])
