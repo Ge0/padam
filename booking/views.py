@@ -1,82 +1,21 @@
 from datetime import datetime
 
-import googlemaps
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404, HttpResponseForbidden
-from django.shortcuts import redirect, render
+from django.http import HttpResponseForbidden
+from django.shortcuts import redirect, render, reverse
 
+from . import core
 from .forms import BookingForm, JoinForm
-from .models import Booking, Car
-
-# Create your views here.
-
-# Utils database functions
-
-
-def get_cars():
-    try:
-        return Car.objects.filter(disponibility=True)
-    except ObjectDoesNotExist:
-        return None
-
-
-def set_car_disponibility(id_car, state):
-    try:
-        car = Car.objects.get(id=id_car)
-        car.disponibility = state
-        car.save()
-    except ObjectDoesNotExist:
-        return None
-
-
-def get_booking(id_booking):
-    try:
-        return Booking.objects.get(id=id_booking)
-    except ObjectDoesNotExist:
-        return None
-
-
-def get_bookings(user_request):
-    try:
-        return Booking.objects.filter(user=user_request)
-    except ObjectDoesNotExist:
-        return None
-
-
-def delete_booking(id_booking):
-    try:
-        inst = Booking.objects.get(id=id_booking)
-        set_car_disponibility(inst.car.id, True)
-        return inst.delete()
-    except ObjectDoesNotExist:
-        return None
-
-
-# gmaps direction
-
-
-def get_duration(start_address, dest_address):
-    gmaps = googlemaps.Client(key='HARDCODED_KEY')
-    now = datetime.now()
-    try:
-        directions_result = gmaps.directions(
-            start_address, dest_address, mode="driving", departure_time=now)
-        return directions_result[0]['legs'][0]['duration_in_traffic']['text']
-    except googlemaps.exceptions.ApiError as inst:
-        raise Http404(inst.args[0])
-
-
-# Views functions
+from .models import Booking
 
 
 def home(request):
-    data = get_bookings(request.user)
+    data = core.get_bookings(request.user)
     return render(request, 'booking/home.html', dict([("bookings", data)]))
 
 
 def booking(request, bookingID):
-    data = get_booking(bookingID)
+    data = core.get_booking(bookingID)
     if data.user == request.user:
         return render(request, 'booking/booking.html',
                       dict([('booking', data)]))
@@ -87,26 +26,33 @@ def booking(request, bookingID):
 def new(request):
     form = BookingForm(request.POST or None)
     if form.is_valid():
-        booking = Booking()
-        booking.user = request.user
-        booking.reservation_date = datetime.now()
-        booking.start_address = form.cleaned_data['start_address']
-        booking.dest_address = form.cleaned_data['dest_address']
-        booking.duration = get_duration(booking.start_address,
-                                        booking.dest_address)
-        booking.state = True
-        if get_cars():
-            booking.car = get_cars()[0]
-            set_car_disponibility(get_cars()[0].id, False)
-        booking.save()
-        return redirect('/bookings/' + str(booking))
+
+        try:
+            duration = core.get_duration(form.cleaned_data['start_address'],
+                                         form.cleaned_data['dest_address'])
+        except core.GetDurationError:
+            return render(request, 'booking/new.html', locals())
+        else:
+            booking = Booking()
+            booking.user = request.user
+            booking.reservation_date = datetime.now()
+            booking.start_address = form.cleaned_data['start_address']
+            booking.dest_address = form.cleaned_data['dest_address']
+            booking.duration = duration
+            booking.state = True
+            cars = core.get_cars()
+            if len(cars) > 0:
+                booking.car = cars[0]
+                core.set_car_disponibility(cars[0].id, False)
+            booking.save()
+            return redirect('/bookings/' + str(booking))
 
     return render(request, 'booking/new.html', locals())
 
 
 def delete(request, bookingID):
-    delete_booking(bookingID)
-    data = get_bookings(request.user)
+    core.delete_booking(bookingID)
+    data = core.get_bookings(request.user)
 
     return render(request, 'booking/home.html', dict([("bookings", data)]))
 
