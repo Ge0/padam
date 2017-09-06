@@ -12,6 +12,14 @@
 	<body>
 		<a href="{% url 'booking:list' %}" ><span>Home</span></a>
 		<a href="{% url 'logout' %}" ><span>Logout</span></a>
+		{% if messages %}
+		<p>Some erros occured:</p>
+		<ul class="messages">
+			{% for message in messages %}
+			<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+			{% endfor %}
+		</ul>
+		{% endif %}
 		{% block content %}
 		{% endblock %}
 	</body>

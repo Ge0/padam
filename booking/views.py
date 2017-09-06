@@ -1,7 +1,9 @@
 import logging
 from datetime import datetime
 
+from django.contrib import messages
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -30,7 +32,8 @@ def booking(request, booking_id):
 def new(request):
     cars = core.get_cars()
     if len(cars) == 0:
-        logger.warning("There is not any car available.")
+        messages.add_message(request, messages.ERROR,
+                             "There is not any car available.")
         return redirect(reverse('booking:list'))
 
     form = BookingForm(request.POST or None)
@@ -40,6 +43,10 @@ def new(request):
             duration = core.get_duration(form.cleaned_data['start_address'],
                                          form.cleaned_data['dest_address'])
         except core.GetDurationError:
+            messages.add_message(request, messages.ERROR,
+                                 "Could not find a way from {} to {}.".format(
+                                    form.cleaned_data['start_address'],
+                                    form.cleaned_data['dest_address']))
             return render(request, 'booking/new.html', locals())
         else:
             booking = Booking()
@@ -59,8 +66,12 @@ def new(request):
 
 
 def delete(request, booking_id):
-    core.delete_booking(booking_id)
     data = core.get_bookings(request.user)
+    try:
+        core.delete_booking(booking_id)
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR,
+                             "Could not delete non-existing booking.")
 
     return render(request, 'booking/home.html', dict([("bookings", data)]))
 
