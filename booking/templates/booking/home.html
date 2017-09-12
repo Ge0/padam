@@ -25,14 +25,14 @@
 		<th>Temps estimé</th>
 		<th>Supprimer</th>
 	</tr>
-	{% for booking in bookings %}
+	{% for booking in object_list %}
 	<tr>
-		<td><a href="{% url 'booking:view' booking_id=booking.id %}" ><span>+</span></a></td>
+		<td><a href="{% url 'booking:view' pk=booking.id %}" ><span>+</span></a></td>
 		<td>{{ booking.reservation_date }}</td>
 		<td>{{ booking.start_address }}</td>
 		<td>{{ booking.dest_address }}</td>
 		<td>{{ booking.duration }}</td>
-		<td><a href="{% url 'booking:delete' booking_id=booking.id %}" ><span>x</span></a></td>
+		<td><a href="{% url 'booking:delete' pk=booking.id %}" ><span>x</span></a></td>
 	</tr>
 	{% endfor %}
 </table>

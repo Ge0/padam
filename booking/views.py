@@ -4,9 +4,10 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseForbidden
-from django.shortcuts import redirect, render
-from django.urls import reverse
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
+from django.views.generic import (CreateView, DetailView, FormView, ListView,
+                                  RedirectView)
 
 from . import core
 from .forms import BookingForm, JoinForm
@@ -15,78 +16,78 @@ from .models import Booking
 logger = logging.getLogger(__name__)
 
 
-def home(request):
-    data = core.get_bookings(request.user)
-    return render(request, 'booking/home.html', dict([("bookings", data)]))
+class HomeView(ListView):
+    template_name = 'booking/home.html'
+    model = Booking
+
+    def get_queryset(self):
+        return Booking.objects.filter(user=self.request.user)
 
 
-def booking(request, booking_id):
-    data = core.get_booking(booking_id)
-    if data.user == request.user:
-        return render(request, 'booking/booking.html',
-                      dict([('booking', data)]))
-    else:
-        return HttpResponseForbidden()
+class BookingView(DetailView):
+    template_name = 'booking/booking.html'
+    model = Booking
 
 
-def new(request):
-    cars = core.get_cars()
-    if len(cars) == 0:
-        messages.add_message(request, messages.ERROR,
-                             "There is not any car available.")
-        return redirect(reverse('booking:list'))
+class NewBookingView(CreateView):
+    template_name = 'booking/new.html'
+    model = Booking
+    form_class = BookingForm
+    success_url = reverse_lazy('booking:list')
 
-    form = BookingForm(request.POST or None)
-    if form.is_valid():
+    def form_valid(self, form):
+        cars = core.get_cars()
+        if len(cars) == 0:
+            messages.add_message(self.request, messages.ERROR,
+                                 "There is not any car available.")
+            return redirect(self.get_success_url())
 
         try:
             duration = core.get_duration(form.cleaned_data['start_address'],
                                          form.cleaned_data['dest_address'])
         except core.GetDurationError:
-            messages.add_message(request, messages.ERROR,
+            messages.add_message(self.request, messages.ERROR,
                                  "Could not find a way from {} to {}.".format(
                                     form.cleaned_data['start_address'],
                                     form.cleaned_data['dest_address']))
-            return render(request, 'booking/new.html', locals())
+            return super().form_invalid(form)
         else:
-            booking = Booking()
-            booking.user = request.user
+            booking = form.save(commit=False)
+            booked_car = cars[0]
+            booking.duration = duration
             booking.reservation_date = datetime.now()
-            booking.start_address = form.cleaned_data['start_address']
-            booking.dest_address = form.cleaned_data['dest_address']
+            booking.user = self.request.user
             booking.duration = duration
             booking.state = True
-            booking.car = cars[0]
-            core.set_car_disponibility(cars[0].id, False)
-            booking.save()
-            return redirect(reverse('booking:view',
-                                    kwargs={'booking_id': booking.id}))
-
-    return render(request, 'booking/new.html', locals())
+            booking.car = booked_car
+            core.set_car_disponibility(booked_car.id, False)
+            return super().form_valid(form)
 
 
-def delete(request, booking_id):
-    data = core.get_bookings(request.user)
-    try:
-        core.delete_booking(booking_id)
-    except ObjectDoesNotExist:
-        messages.add_message(request, messages.ERROR,
-                             "Could not delete non-existing booking.")
+class JoinView(FormView):
+    template_name = 'booking/join.html'
+    form_class = JoinForm
 
-    return render(request, 'booking/home.html', dict([("bookings", data)]))
-
-
-def join(request):
-    form = JoinForm(request.POST or None)
-    if form.is_valid():
+    def form_valid(self, form):
         django_user = User.objects.create(
             username=form.cleaned_data['email'],
             last_name=form.cleaned_data['surname'],
             first_name=form.cleaned_data['firstname'],
             email=form.cleaned_data['email'])
 
-        django_user.set_password(request.POST['password'])
+        django_user.set_password(form.cleaned_data['password'])
         django_user.save()
         return redirect(reverse('login'))
 
-    return render(request, 'booking/join.html', locals())
+
+class DeleteBookingView(RedirectView):
+    pattern_name = "booking:list"
+
+    def get_redirect_url(self, *args, **kwargs):
+        try:
+            core.delete_booking(kwargs['pk'])
+        except ObjectDoesNotExist:
+            messages.add_message(self.request, messages.ERROR,
+                                 "Could not delete non-existing booking.")
+        del kwargs['pk']
+        return super().get_redirect_url(*args, **kwargs)

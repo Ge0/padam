@@ -1,12 +1,12 @@
 """Booking Django App core functions."""
-import googlemaps
 import logging
 from datetime import datetime
+
+import googlemaps
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Booking, Car
-
 
 logger = logging.getLogger(__name__)
 
@@ -35,12 +35,17 @@ def set_car_disponibility(id_car, state):
         return None
 
 
-def get_booking(id_booking):
+def get_booking(booking_id, queryset=None):
     try:
-        return Booking.objects.get(id=id_booking)
+        if queryset is None:
+            booking = Booking.objects.get(id=booking_id)
+        else:
+            booking = queryset.get(id=booking_id)
     except ObjectDoesNotExist as exn:
         logger.warning("get_booking(): %s", str(exn))
         return None
+    else:
+        return booking
 
 
 def get_bookings(user_request):

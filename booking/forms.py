@@ -1,8 +1,14 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
+from .models import Booking
 
-class BookingForm(forms.Form):
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ['start_address', 'dest_address']
+
     start_address = forms.CharField(max_length=250, label="Adresse de départ")
     dest_address = forms.CharField(
         max_length=250, label="Adresse de destination")
